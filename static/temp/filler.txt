@@ -1,0 +1,2 @@
+Without this directory the app doesn`t work. 
+This file prevents git from deleting the directory. 

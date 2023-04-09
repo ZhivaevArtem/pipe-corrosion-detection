@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Edit "{{ post['title'] }}"{% endblock %}</h1>
+  <a class="action" href="{{ url_for('blog.index') }}">Back to Index</a>
+{% endblock %}
+
+{% block content %}
+<body onload="pencil()">
+    <form id=drawtype method="post">
+        <label for="title">Title</label>
+        <br>
+        <input name="title" id="title" value="{{ request.form['title'] or post['title'] }}" required>
+        <br>
+        <label for="body">Comment</label>
+        <br>
+        <textarea name="body" id="body">{{ request.form['body'] or post['body'] }}</textarea>
+        <br>
+        <label>Ширина кисти</label></td>
+        <button id="pixel_minus" type="button" onclick="reduce_pixel()" style="width: 25px;">-</button>
+        <button id="pixel_plus" type="button" onclick="add_pixel()" style="width: 25px;">+</button>
+        <hr>
+        <!-- <img src="{{ url_for('blog.layer', id=post['id'], layer='layer_salinity') }}"> -->
+        <input type="hidden" name="canvasimg" id="canvasimg">
+        <input type="radio" id="salinity" name="fdbcktype" value="salinity" onclick="color('#0000FF')" checked><label for="salinity">Засоленность</label>
+        <input type="radio" id="corrosion" name="fdbcktype" value="corrosion" onclick="color('#00FF00')"><label for="corrosion">Коррозия по телу</label>
+        <input type="radio" id="pitting" name="fdbcktype" value="pitting" onclick="color('#00FFFF')"><label for="pitting">Питтинг</label>
+        <input type="radio" id="oil" name="fdbcktype" value="oil" onclick="color('#FF0000')"><label for="oil">Слой нефтепродуктов</label>
+        <input type="radio" id="recess" name="fdbcktype" value="recess" onclick="color('#FF00FF')"><label for="recess">Углубление</label>
+        <input type="radio" id="elongated_recess" name="fdbcktype" value="elongated_recess" onclick="color('#FFFF00')"><label for="elongated_recess">Углубление протяженное</label>
+        <hr>
+        <input type="radio" id="on" name="eraser12" value="on"><label for="on" onclick="eraser(true)">Ластик вкл</label>
+        <input type="radio" id="off" name="eraser12" value="off" checked><label for="off" onclick="eraser(false)">Ластик выкл</label>
+        <hr>
+        <!-- <button id="restoreLayer" type="button" onclick="restoreLayer()">Restore layer</button>-->
+        <input type="Submit" name="Save layer" value="Save defect layer" onclick="save()">
+        <hr>
+        <canvas id="paint" style="border: 2px solid #000000; background: url('/static/temp/background.png');"></canvas>
+    </form>
+    <hr>
+    <form action="{{ url_for('blog.delete', id=post['id']) }}" method="post">
+        <input class="danger" type="submit" value="Delete post" onclick="return confirm('Do you really want to delete entire post?');">
+    </form>
+    <script src="http://code.jquery.com/jquery-1.8.3.js"></script>
+    <script src="/static/scripts/script.js"></script>
+</body>
+{% endblock %}

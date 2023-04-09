@@ -1,0 +1,23 @@
+*env/
+
+*.pyc
+__pycache__/
+
+.pytest_cache/
+.coverage
+htmlcov/
+
+dist/
+build/
+*.egg-info/
+
+.ipynb_checkpoints/*
+data/*
+*.ipynb
+Dataset generator/images/*
+Dataset generator/masks/*
+
+static/temp/*.jpg
+static/temp/*.png
+
+instance/*
