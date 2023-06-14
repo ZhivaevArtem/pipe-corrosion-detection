@@ -83,3 +83,54 @@ class DecisionTreeClassifier:
 
     def predict(self, X):
         return np.array([self.predict_instance(x) for x in X])
+
+    def get_weights(self):
+        weights = []
+        nodes = [self]
+
+        while len(nodes) > 0:
+            node = nodes.pop()
+            if node is None:
+                continue
+            if node.value is not None:
+                weights.append((0, node.max_depth, node.value))
+            else:
+                weights.append((1, node.max_depth, node.feature_index, node.threshold))
+            nodes.append(node.right)
+            nodes.append(node.left)
+
+        return weights
+
+    def _assign_weight(self, weight):
+        self.feature_index = None
+        self.threshold = None
+        self.left = None
+        self.right = None
+        self.value = None
+        self.max_depth = weight[1]
+        if weight[0] == 0:
+            self.value = weight[2]
+        else:
+            self.feature_index = weight[2]
+            self.threshold = weight[3]
+
+    def set_weights(self, weights):
+        parents = [self]
+
+        for w in weights:
+            parents[-1]._assign_weight(w)
+            if w[0] == 0:
+                parents.pop()
+                if len(parents) == 0:
+                    return
+                while parents[-1].right is not None:
+                    parents.pop()
+                    if len(parents) == 0:
+                        return
+                new = DecisionTreeClassifier()
+                parents[-1].right = new
+                parents.append(new)
+            else:
+                new = DecisionTreeClassifier()
+                parents[-1].left = new
+                parents.append(new)
