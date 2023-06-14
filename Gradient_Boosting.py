@@ -34,3 +34,24 @@ class GradientBoostingClassifier:
 
     def predictb(self, X):
         return np.array([0 if p < .5 else 1 for p in self.predict(X)])
+
+    def get_weights(self):
+        weights = (
+            self.ensemble_size,
+            self.learning_rate,
+            self.max_depth,
+            self.initial_prediction,
+            [e.get_weights() for e in self.ensemble],
+        )
+        return weights
+
+    def set_weights(self, weights):
+        self.ensemble_size = weights[0]
+        self.learning_rate = weights[1]
+        self.max_depth = weights[2]
+        self.initial_prediction = weights[3]
+        self.ensemble = []
+        for w in weights[4]:
+            tree = DecisionTreeClassifier()
+            tree.set_weights(w)
+            self.ensemble.append(tree)
