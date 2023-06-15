@@ -48,8 +48,8 @@ class DecisionTreeClassifier:
         return best_feature_index, best_threshold
 
     def build_tree(self, X, y, depth):
+        self.value = np.mean(y)
         if self.max_depth is not None and depth >= self.max_depth:
-            self.value = np.mean(y)
             return
 
         feature_index, threshold = self.find_best_split(X, y)
@@ -73,7 +73,10 @@ class DecisionTreeClassifier:
         self.build_tree(X, y, depth=0)
 
     def predict_instance(self, x):
-        if self.value is not None:
+        if self.left is None and self.right is None:
+            return self.value
+
+        if x[self.feature_index] is None:
             return self.value
 
         if x[self.feature_index] <= self.threshold:
@@ -92,10 +95,10 @@ class DecisionTreeClassifier:
             node = nodes.pop()
             if node is None:
                 continue
-            if node.value is not None:
+            if node.left is None and node.right is None:
                 weights.append((0, node.max_depth, node.value))
             else:
-                weights.append((1, node.max_depth, node.feature_index, node.threshold))
+                weights.append((1, node.max_depth, node.value, node.feature_index, node.threshold))
             nodes.append(node.right)
             nodes.append(node.left)
 
@@ -106,13 +109,11 @@ class DecisionTreeClassifier:
         self.threshold = None
         self.left = None
         self.right = None
-        self.value = None
+        self.value = weight[2]
         self.max_depth = weight[1]
-        if weight[0] == 0:
-            self.value = weight[2]
-        else:
-            self.feature_index = weight[2]
-            self.threshold = weight[3]
+        if weight[0] == 1:
+            self.feature_index = weight[3]
+            self.threshold = weight[4]
 
     def set_weights(self, weights):
         parents = [self]
