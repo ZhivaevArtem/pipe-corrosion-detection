@@ -1,23 +1,19 @@
-from ast import Bytes
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
+import base64
+import pickle
 from io import BytesIO
-from click import open_file
+
 from flask import (
-    Blueprint, flash, g, redirect, render_template, request, url_for, send_file, current_app
+    Blueprint, flash, g, redirect, render_template, request, url_for, send_file
 )
+from flask_mail import Message
 from werkzeug.exceptions import abort
 
-from auth import login_required
-from db import get_db
-
-from app import mail
-from flask_mail import Message
-
+import Gradient_Boosting
 from Data import *
 from Simple_Unet import *
-
-import base64
+from app import mail
+from auth import login_required
+from db import get_db
 
 bp = Blueprint('blog', __name__)
 
@@ -261,11 +257,35 @@ def update(id):
     post = get_post(id)
 
     if request.method == 'POST':
-        title = request.form['title']
-        picture = request.form['canvasimg'] # picture is str object
         error = None
 
-        if not title:
+        title = request.form.get('title')
+        picture = request.form.get('canvasimg')
+        timeseries = request.files.get('timeseries')
+
+        if timeseries is not None:
+            content = timeseries.stream.read().decode('utf-8')
+            df = pd.read_csv(io.StringIO(content))
+            series = np.array(df[df.columns[0]])
+
+            classifier = Gradient_Boosting.GradientBoostingClassifier()
+            with open('gradient_weight.pkl', 'rb') as f:
+                weights = pickle.load(f)
+                classifier.set_weights(weights)
+
+            predict = classifier.predictb(np.array([series]))
+            predict = int(predict[0])
+
+            db = get_db()
+            db.execute(
+                'UPDATE post SET suitability = ? WHERE id = ?',
+                (predict, id)
+            )
+            db.commit()
+
+            return render_template('blog/show.html', post=post)
+
+        if title is None:
             error = 'Title is required.'
 
         if error is not None:

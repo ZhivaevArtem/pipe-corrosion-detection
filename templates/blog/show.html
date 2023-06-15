@@ -39,5 +39,17 @@
    <br><a>Углубление протяжённое: {{ post['ext_recess_percentage'] }}%:</a><br>
    <img src="{{ url_for('blog.layer', id=post['id'], layer='original_picture') }}" width=450px/>
    <img src="{{ url_for('blog.layer', id=post['id'], layer='layer_ext_recess') }}" width=450px/>
+   <hr>
+   {% if post['suitability'] == 0 %}
+       Непригодна
+   {% elif post['suitability'] == 1 %}
+       Пригодна
+   {% else %}
+       <form method="post" action="{{ url_for('blog.update', id=post['id']) }}" enctype="multipart/form-data">
+         <input type="file" name="timeseries" />
+         <br>
+         <button type="submit">Save</button>
+       </form>
+   {% endif %}
   {% endif %}
 {% endblock %}
