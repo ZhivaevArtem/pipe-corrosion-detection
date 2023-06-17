@@ -283,7 +283,7 @@ def update(id):
             )
             db.commit()
 
-            return render_template('blog/show.html', post=post)
+            return redirect(f'/{id}/show#suitability')
 
         if title is None:
             error = 'Title is required.'

@@ -39,17 +39,27 @@
    <br><a>Углубление протяжённое: {{ post['ext_recess_percentage'] }}%:</a><br>
    <img src="{{ url_for('blog.layer', id=post['id'], layer='original_picture') }}" width=450px/>
    <img src="{{ url_for('blog.layer', id=post['id'], layer='layer_ext_recess') }}" width=450px/>
-   <hr>
+   <hr id="suitability">
+   Пригодность к использованию:
+   <br>
    {% if post['suitability'] == 0 %}
-       Непригодна
+       <span style="color: red; font-weight: 900;">Непригодна</span>
    {% elif post['suitability'] == 1 %}
-       Пригодна
+       <span style="color: green; font-weight: 900;">Пригодна</span>
    {% else %}
-       <form method="post" action="{{ url_for('blog.update', id=post['id']) }}" enctype="multipart/form-data">
-         <input type="file" name="timeseries" />
-         <br>
-         <button type="submit">Save</button>
-       </form>
+       <span style="color: orange; font-weight: 900;">N/A</span>
    {% endif %}
+
+   <br>
+   <br>
+   <br>
+   <form method="post" action="{{ url_for('blog.update', id=post['id']) }}" enctype="multipart/form-data">
+     <label for="timeseries">
+       Временной ряд:<br>
+       <input type="file" name="timeseries" accept="text/csv" id="timeseries" onchange="if (this.files.length) document.getElementById('submit-suitability').removeAttribute('disabled')" />
+     </label>
+     <br>
+     <button id="submit-suitability" disabled type="submit">Определить пригодность</button>
+   </form>
   {% endif %}
 {% endblock %}
