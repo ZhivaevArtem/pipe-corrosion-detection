@@ -29,6 +29,7 @@ CREATE TABLE post (
     oil_percentage INTEGER NOT NULL,
     recess_percentage INTEGER NOT NULL,
     ext_recess_percentage INTEGER NOT NULL,
+    suitability INTEGER,
     edit_salinity BLOB,
     edit_corrosion BLOB,
     edit_pitting BLOB,
