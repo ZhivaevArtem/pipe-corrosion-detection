@@ -73,7 +73,7 @@ class DecisionTreeClassifier:
             return self.value
 
         if x[self.feature_index] is None:
-            return self.value
+            return (self.left.predict_instance(x) + self.right.predict_instance(x)) / 2
 
         if x[self.feature_index] <= self.threshold:
             return self.left.predict_instance(x)
