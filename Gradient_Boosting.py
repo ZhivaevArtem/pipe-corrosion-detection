@@ -51,3 +51,42 @@ class GradientBoostingClassifier:
             tree = DecisionTreeClassifier()
             tree.set_weights(w)
             self.ensemble.append(tree)
+
+
+if __name__ == '__main__':
+    import os
+    import csv
+    import pandas as pd
+    import random
+    c = GradientBoostingClassifier()
+
+    folder_path = r'C:\Users\Zhivaev_Artem\Downloads\Dataset'
+
+    tensor = []
+
+    for filename in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, filename)
+        if os.path.isfile(file_path) and file_path.endswith('.csv'):
+            df = pd.read_csv(file_path)
+            column = list(df.iloc[:, 0])
+
+            tensor.append([
+                random.uniform(0, 100),
+                random.uniform(0, 100),
+                random.uniform(0, 100),
+                random.uniform(0, 100),
+                random.uniform(0, 100),
+                random.uniform(0, 100),
+                random.uniform(0, 10),
+                random.uniform(0, 1),
+                *column
+            ])
+
+    c.fit(np.array(tensor), np.array([random.randint(0, 1) for i in range(len(tensor))]))
+
+    weights = c.get_weights()
+
+    import pickle as pkl
+
+    with open('gradient_weight.pkl', 'wb') as f:
+        pkl.dump(weights, f)

@@ -7,6 +7,7 @@ from flask import (
 )
 from flask_mail import Message
 from werkzeug.exceptions import abort
+from werkzeug.datastructures import FileStorage
 
 import Gradient_Boosting
 from Data import *
@@ -14,6 +15,7 @@ from Simple_Unet import *
 from app import mail
 from auth import login_required
 from db import get_db
+
 
 bp = Blueprint('blog', __name__)
 
@@ -183,6 +185,7 @@ def create():
             error = 'File format is not supported'
         
         #Создать/запустить UNet, записать изображения на диск (см старый проект app.py, save_img), записать их в переменные ИЛИ читать прямо из переменных
+        img_bytes = None
         try:
             image_io = ImageIO()
             img_bytes = file.read()
@@ -200,7 +203,20 @@ def create():
             error = 'Error during prediction'
 
         if error is not None:
-            flash(error)
+            if len(img_bytes) != 0:
+                flash(error)
+            else:  # if file hasn't been provided
+                db = get_db()
+                with open('none.jpg', 'rb') as f:
+                    content = f.read()
+                    db.execute(
+                        'INSERT INTO post (title, body, author_id, original_picture, layer_clear, layer_composite, layer_salinity, layer_corrosion, layer_pitting, layer_oil, layer_recess, layer_ext_recess, clear_percentage, salinity_percentage, corrosion_percentage, pitting_percentage, oil_percentage, recess_percentage, ext_recess_percentage)'
+                        ' VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                        (title, body, g.user['id'], content,
+                         content, content, content, content, content, content, content, content,
+                         -1, -1, -1, -1, -1, -1, -1)
+                    )
+                db.commit()
         else:
             db = get_db()
             with open("static/temp/orig.png", 'rb') as orig, open("static/temp/res_layer0.png", 'rb') as im_clear, open("static/temp/res.png", 'rb') as im_composite, open("static/temp/res_layer1.png", 'rb') as im_salen, open("static/temp/res_layer2.png", 'rb') as im_corros, open("static/temp/res_layer3.png", 'rb') as im_pit, open("static/temp/res_layer4.png", 'rb') as im_oil, open("static/temp/res_layer5.png", 'rb') as im_rec, open("static/temp/res_layer6.png", 'rb') as im_erec:
@@ -251,41 +267,104 @@ def layer(id, layer):
     return send_file(bytes_io, mimetype='image/png')
 
 
+@bp.route('/<int:id>/suitability', methods=('POST',))
+@login_required
+def suitability(id):
+    post = get_post(id)
+
+    layers_count = 6
+    scalars_count = 2
+    chrono_size = 180
+
+    tensor = [None] * (layers_count + scalars_count + chrono_size)
+
+    if request.method == 'POST':
+        resistance = request.form.get('electrical_resistance')
+        if resistance: resistance = float(resistance)
+        capacity = request.form.get('electrical_capacity')
+        if capacity: capacity = float(capacity)
+        chrono = request.files.get('chronopotentiogram')
+
+        if post['electrical_resistance']:
+            tensor[7] = post['electrical_resistance']
+        if post['electrical_capacity']:
+            tensor[8] = post['electrical_capacity']
+        if post['chronopotentiogram']:
+            c = post['chronopotentiogram']
+            df = pd.read_csv(io.BytesIO(c))
+            column = list(df.iloc[:, 0])
+            offset = layers_count + scalars_count
+            tensor[offset:offset + chrono_size] = column
+
+
+        if post['clear_percentage'] >= 0:
+            tensor[0] = post['clear_percentage']
+        if post['salinity_percentage'] >= 0:
+            tensor[1] = post['salinity_percentage']
+        if post['corrosion_percentage'] >= 0:
+            tensor[2] = post['corrosion_percentage']
+        if post['pitting_percentage'] >= 0:
+            tensor[3] = post['pitting_percentage']
+        if post['oil_percentage'] >= 0:
+            tensor[4] = post['oil_percentage']
+        if post['recess_percentage'] >= 0:
+            tensor[5] = post['recess_percentage']
+        if post['ext_recess_percentage'] >= 0:
+            tensor[6] = post['ext_recess_percentage']
+
+        if resistance:
+            tensor[7] = int(resistance)
+        if capacity:
+            tensor[8] = int(capacity)
+
+        if chrono:
+            content = chrono.stream.read().decode('utf-8')
+            df = pd.read_csv(io.StringIO(content))
+            series = list(df[df.columns[0]])
+
+            offset = layers_count + scalars_count
+            tensor[offset:offset+chrono_size] = series
+
+            df.to_csv('static/temp/chrono.csv', index=False)
+
+        classifier = Gradient_Boosting.GradientBoostingClassifier()
+        with open('gradient_weight.pkl', 'rb') as f:
+            weights = pickle.load(f)
+            classifier.set_weights(weights)
+
+        predict = 0 if all(i is None for i in tensor) else int(classifier.predictb(np.array([tensor]))[0])
+
+        db = get_db()
+        chrono_content = None
+        if chrono:
+            with open('static/temp/chrono.csv', 'rb') as f:
+                chrono_content = f.read()
+        try:
+            os.remove('static/temp/chrono.csv')
+        except:
+            pass
+
+        db.execute(
+            'UPDATE post SET suitability = ?, electrical_resistance = ?, electrical_capacity = ?'
+            'WHERE id = ?',
+            (predict, resistance if resistance else None, capacity if capacity else None, id)
+        )
+        db.commit()
+
+    return redirect(f'/{id}/show#suitability')
+
+
 @bp.route('/<int:id>/update', methods=('GET', 'POST'))
 @login_required
 def update(id):
     post = get_post(id)
 
     if request.method == 'POST':
+        title = request.form['title']
+        picture = request.form['canvasimg'] # picture is str object
         error = None
 
-        title = request.form.get('title')
-        picture = request.form.get('canvasimg')
-        timeseries = request.files.get('timeseries')
-
-        if timeseries is not None:
-            content = timeseries.stream.read().decode('utf-8')
-            df = pd.read_csv(io.StringIO(content))
-            series = np.array(df[df.columns[0]])
-
-            classifier = Gradient_Boosting.GradientBoostingClassifier()
-            with open('gradient_weight.pkl', 'rb') as f:
-                weights = pickle.load(f)
-                classifier.set_weights(weights)
-
-            predict = classifier.predictb(np.array([series]))
-            predict = int(predict[0])
-
-            db = get_db()
-            db.execute(
-                'UPDATE post SET suitability = ? WHERE id = ?',
-                (predict, id)
-            )
-            db.commit()
-
-            return redirect(f'/{id}/show#suitability')
-
-        if title is None:
+        if not title:
             error = 'Title is required.'
 
         if error is not None:
