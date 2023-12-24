@@ -193,7 +193,7 @@ def create():
             h,w = img.shape[2],img.shape[3]
             net = UNet(num_class=7)
             device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-            net.load_state_dict(torch.load('dict.pth', map_location=device))
+            net.load_state_dict(torch.load('new_dict.pth', map_location=device))
             net.eval()
             res = net(img)
             percents = image_io.save(res,'static/temp/res')
