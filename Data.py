@@ -63,13 +63,13 @@ class ImageIO:
             layer_a = np.array(layer)
             if(i%2):
                 layer_b[:,:] = layer[:,:]
-                b += layer
-            if((i//2)%2):
-                g += layer
-                layer_g[:,:] = layer[:,:]
-            if((i//4)%2):
                 r += layer
-                layer_r[:,:] = layer[:,:]
+            # if((i//2)%2):
+            #     g += layer
+            #     layer_g[:,:] = layer[:,:]
+            # if((i//4)%2):
+            #     r += layer
+            #     layer_r[:,:] = layer[:,:]
             percent = int(np.count_nonzero(layer)/size*100)
             percents.append(percent)
             layer = cv2.merge((layer_b,layer_g,layer_r,layer_a))
