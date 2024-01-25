@@ -75,7 +75,7 @@ class ImageIO:
             layer = cv2.merge((layer_b,layer_g,layer_r,layer_a))
             _,layer = cv2.threshold(layer,0,255,cv2.THRESH_BINARY)
             cv2.imwrite(f'{path}_layer{i}{suffix}',layer)
-        img = cv2.merge((b,g,r))
+        img = cv2.merge((b,np.empty_like(img),np.empty_like(img)))
         _,img = cv2.threshold(img,0,255,cv2.THRESH_BINARY)
         cv2.imwrite(f'{path}{suffix}',img)
         return percents  
