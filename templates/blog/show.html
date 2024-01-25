@@ -18,42 +18,42 @@
                 - Дефекты не обнаружены
                 <br>
                 <button style="background-color: #0000FF; height: 20px; width: 20px;" disabled></button>
-                - Засоленность
+                - Коррозия
                 <br>
-                <button style="background-color: #00FF00; height: 20px; width: 20px;" disabled></button>
-                - Коррозия по телу
-                <br>
-                <button style="background-color: #00FFFF; height: 20px; width: 20px;" disabled></button>
-                - Питтинг
-                <br>
-                <button style="background-color: #FF0000; height: 20px; width: 20px;" disabled></button>
-                - Слой нефтепродуктов
-                <br>
-                <button style="background-color: #FF00FF; height: 20px; width: 20px;" disabled></button>
-                - Углубление
-                <br>
-                <button style="background-color: #FFFF00; height: 20px; width: 20px;" disabled></button>
-                - Углубление протяженное
+{#                <button style="background-color: #00FF00; height: 20px; width: 20px;" disabled></button>#}
+{#                - Коррозия по телу#}
+{#                <br>#}
+{#                <button style="background-color: #00FFFF; height: 20px; width: 20px;" disabled></button>#}
+{#                - Питтинг#}
+{#                <br>#}
+{#                <button style="background-color: #FF0000; height: 20px; width: 20px;" disabled></button>#}
+{#                - Слой нефтепродуктов#}
+{#                <br>#}
+{#                <button style="background-color: #FF00FF; height: 20px; width: 20px;" disabled></button>#}
+{#                - Углубление#}
+{#                <br>#}
+{#                <button style="background-color: #FFFF00; height: 20px; width: 20px;" disabled></button>#}
+{#                - Углубление протяженное#}
             </p>
             <a>Изображения каждого слоя дефектов:</a><br>
-            <a>Засоленность: {{ post['salinity_percentage'] }}%:</a><br>
+            <a>Коррозия: {{ post['salinity_percentage'] }}%:</a><br>
             <img src="{{ url_for('blog.layer', id=post['id'], layer='original_picture') }}" width=450px/>
             <img src="{{ url_for('blog.layer', id=post['id'], layer='layer_salinity') }}" width=450px/>
-            <br><a>Коррозия по телу: {{ post['corrosion_percentage'] }}%:</a><br>
-            <img src="{{ url_for('blog.layer', id=post['id'], layer='original_picture') }}" width=450px/>
-            <img src="{{ url_for('blog.layer', id=post['id'], layer='layer_corrosion') }}" width=450px/>
-            <br><a>Питтинг: {{ post['pitting_percentage'] }}%:</a><br>
-            <img src="{{ url_for('blog.layer', id=post['id'], layer='original_picture') }}" width=450px/>
-            <img src="{{ url_for('blog.layer', id=post['id'], layer='layer_pitting') }}" width=450px/>
-            <br><a>Слой нефтепродуктов: {{ post['oil_percentage'] }}%:</a><br>
-            <img src="{{ url_for('blog.layer', id=post['id'], layer='original_picture') }}" width=450px/>
-            <img src="{{ url_for('blog.layer', id=post['id'], layer='layer_oil') }}" width=450px/>
-            <br><a>Углубление: {{ post['recess_percentage'] }}%:</a><br>
-            <img src="{{ url_for('blog.layer', id=post['id'], layer='original_picture') }}" width=450px/>
-            <img src="{{ url_for('blog.layer', id=post['id'], layer='layer_recess') }}" width=450px/>
-            <br><a>Углубление протяжённое: {{ post['ext_recess_percentage'] }}%:</a><br>
-            <img src="{{ url_for('blog.layer', id=post['id'], layer='original_picture') }}" width=450px/>
-            <img src="{{ url_for('blog.layer', id=post['id'], layer='layer_ext_recess') }}" width=450px/>
+{#            <br><a>Коррозия по телу: {{ post['corrosion_percentage'] }}%:</a><br>#}
+{#            <img src="{{ url_for('blog.layer', id=post['id'], layer='original_picture') }}" width=450px/>#}
+{#            <img src="{{ url_for('blog.layer', id=post['id'], layer='layer_corrosion') }}" width=450px/>#}
+{#            <br><a>Питтинг: {{ post['pitting_percentage'] }}%:</a><br>#}
+{#            <img src="{{ url_for('blog.layer', id=post['id'], layer='original_picture') }}" width=450px/>#}
+{#            <img src="{{ url_for('blog.layer', id=post['id'], layer='layer_pitting') }}" width=450px/>#}
+{#            <br><a>Слой нефтепродуктов: {{ post['oil_percentage'] }}%:</a><br>#}
+{#            <img src="{{ url_for('blog.layer', id=post['id'], layer='original_picture') }}" width=450px/>#}
+{#            <img src="{{ url_for('blog.layer', id=post['id'], layer='layer_oil') }}" width=450px/>#}
+{#            <br><a>Углубление: {{ post['recess_percentage'] }}%:</a><br>#}
+{#            <img src="{{ url_for('blog.layer', id=post['id'], layer='original_picture') }}" width=450px/>#}
+{#            <img src="{{ url_for('blog.layer', id=post['id'], layer='layer_recess') }}" width=450px/>#}
+{#            <br><a>Углубление протяжённое: {{ post['ext_recess_percentage'] }}%:</a><br>#}
+{#            <img src="{{ url_for('blog.layer', id=post['id'], layer='original_picture') }}" width=450px/>#}
+{#            <img src="{{ url_for('blog.layer', id=post['id'], layer='layer_ext_recess') }}" width=450px/>#}
         {% else %}
             <a>Изображения не предоставлены</a>
         {% endif %}

@@ -199,7 +199,7 @@ def create():
             percents = image_io.save(res,'static/temp/res')
             file.seek(0)
             file.save('static/temp/orig.png')
-        except:
+        except Exception as ex:
             error = 'Error during prediction'
 
         if error is not None:
